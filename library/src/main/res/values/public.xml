@@ -1,0 +1,3 @@
+<resources>
+    <public name="full_screen_dialog_lib" type="string" />
+</resources>
