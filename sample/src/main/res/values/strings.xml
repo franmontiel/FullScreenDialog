@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">FullScreenDialog Sample</string>
+
+    <string name="insert_name">Insert name</string>
+    <string name="insert_surname">Insert surname</string>
+    <string name="open_dialog">Open surname dialog</string>
+    <string name="full_name">Full name:</string>
+    <string name="dialog_positive_button">Show name</string>
+    <string name="hi_name">Hi %s!</string>
 </resources>
