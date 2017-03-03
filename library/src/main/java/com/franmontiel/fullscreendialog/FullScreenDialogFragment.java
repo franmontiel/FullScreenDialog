@@ -3,6 +3,7 @@ package com.franmontiel.fullscreendialog;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -15,10 +16,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.WindowDecorActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -97,8 +102,27 @@ public class FullScreenDialogFragment extends DialogFragment {
             hideActivityActionBar(savedInstanceState == null);
 
         View view = inflater.inflate(R.layout.full_screen_dialog, container, false);
+
         initToolbar(view);
+
+        if (fullScreen)
+            setThemeBackground(view);
+
         return view;
+    }
+
+    private void setThemeBackground(View view) {
+        TypedValue a = new TypedValue();
+        getActivity().getTheme().resolveAttribute(android.R.attr.windowBackground, a, true);
+        if (a.type >= TypedValue.TYPE_FIRST_COLOR_INT && a.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            view.setBackgroundColor(a.data);
+        } else {
+            try {
+                Drawable d = ResourcesCompat.getDrawable(getActivity().getResources(), a.resourceId, getActivity().getTheme());
+                ViewCompat.setBackground(view, d);
+            } catch (Resources.NotFoundException ignore) {
+            }
+        }
     }
 
     private void initToolbar(View view) {
@@ -160,7 +184,11 @@ public class FullScreenDialogFragment extends DialogFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (savedInstanceState == null)
-            getChildFragmentManager().beginTransaction().add(R.id.content, content).commitNow();
+            getChildFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.none, 0, 0, R.anim.none)
+                    .add(R.id.content, content)
+                    .commitNow();
 
     }
 
@@ -204,14 +232,15 @@ public class FullScreenDialogFragment extends DialogFragment {
         FragmentActivity activity = getActivity();
         if (activity instanceof AppCompatActivity) {
             ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
-            if (actionBar != null) {
+            if (actionBar != null && actionBar instanceof WindowDecorActionBar) {
                 actionBar.setShowHideAnimationEnabled(true);
                 actionBar.show();
             }
-        }
-        android.app.ActionBar actionBar = activity.getActionBar();
-        if (actionBar != null) {
-            actionBar.show();
+        } else {
+            android.app.ActionBar actionBar = activity.getActionBar();
+            if (actionBar != null) {
+                actionBar.show();
+            }
         }
     }
 
@@ -219,14 +248,15 @@ public class FullScreenDialogFragment extends DialogFragment {
         FragmentActivity activity = getActivity();
         if (activity instanceof AppCompatActivity) {
             ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
-            if (actionBar != null) {
+            if (actionBar != null && actionBar instanceof WindowDecorActionBar) {
                 actionBar.setShowHideAnimationEnabled(animate);
                 actionBar.hide();
             }
-        }
-        android.app.ActionBar actionBar = activity.getActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
+        } else {
+            android.app.ActionBar actionBar = activity.getActionBar();
+            if (actionBar != null) {
+                actionBar.hide();
+            }
         }
     }
 
