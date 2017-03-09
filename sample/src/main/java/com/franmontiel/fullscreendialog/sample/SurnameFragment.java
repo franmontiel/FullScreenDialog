@@ -1,8 +1,10 @@
 package com.franmontiel.fullscreendialog.sample;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -11,21 +13,20 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.franmontiel.fullscreendialog.DialogConfirmationButtonController;
-import com.franmontiel.fullscreendialog.OnDialogActionListener;
+import com.franmontiel.fullscreendialog.FullScreenDialogContent;
+import com.franmontiel.fullscreendialog.FullScreenDialogController;
 
 /**
  * Created by fj on 25/02/17.
  */
 
-public class SurnameFragment extends Fragment
-        implements OnDialogActionListener, DialogConfirmationButtonController {
+public class SurnameFragment extends Fragment implements FullScreenDialogContent {
 
     public static final String EXTRA_NAME = "EXTRA_NAME";
     public static final String RESULT_FULL_NAME = "RESULT_FULL_NAME";
 
-    private DialogConfirmationButtonStatusController confirmationStatusController;
     private EditText surname;
+    private FullScreenDialogController dialogController;
 
     @Nullable
     @Override
@@ -34,8 +35,8 @@ public class SurnameFragment extends Fragment
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onDialogCreated(final FullScreenDialogController dialogController) {
+        this.dialogController = dialogController;
     }
 
     @Override
@@ -47,7 +48,8 @@ public class SurnameFragment extends Fragment
 
         surname = (EditText) getView().findViewById(R.id.surnameField);
 
-        confirmationStatusController.setEnabled(!surname.getText().toString().isEmpty());
+
+        dialogController.setConfirmButtonEnabled(!surname.getText().toString().isEmpty());
         surname.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -55,7 +57,7 @@ public class SurnameFragment extends Fragment
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                confirmationStatusController.setEnabled(!s.toString().trim().isEmpty());
+                dialogController.setConfirmButtonEnabled(!s.toString().trim().isEmpty());
             }
 
             @Override
@@ -65,19 +67,31 @@ public class SurnameFragment extends Fragment
     }
 
     @Override
-    public void setDialogConfirmationButtonStatusController(DialogConfirmationButtonStatusController statusController) {
-        this.confirmationStatusController = statusController;
-    }
-
-    @Override
-    public void onConfirmDialog(DialogConfirmActionCallback callback) {
+    public boolean onConfirmClick(FullScreenDialogController dialog) {
         Bundle result = new Bundle();
         result.putString(RESULT_FULL_NAME, getArguments().getString(EXTRA_NAME) + " " + surname.getText().toString());
-        callback.onActionConfirmed(result);
+        dialog.confirm(result);
+        return true;
     }
 
     @Override
-    public void onDiscardDialog(DialogDiscardActionCallback callback) {
-        callback.onActionConfirmed();
+    public boolean onDiscardClick(FullScreenDialogController dialog) {
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.discard_confirmation_title)
+                .setMessage(R.string.discard_confirmation_message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialogController.discard();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Nothing to do
+                    }
+                }).show();
+
+        return true;
     }
 }

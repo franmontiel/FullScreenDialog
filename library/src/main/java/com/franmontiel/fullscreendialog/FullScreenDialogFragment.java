@@ -1,5 +1,6 @@
 package com.franmontiel.fullscreendialog;
 
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.WindowDecorActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +38,14 @@ import android.view.Window;
  */
 public class FullScreenDialogFragment extends DialogFragment {
 
+    public interface OnConfirmListener {
+        void onConfirm(@Nullable Bundle result);
+    }
+
+    public interface OnDiscardListener {
+        void onDiscard();
+    }
+
     private static final String BUILDER_TITLE = "BUILDER_TITLE";
     private static final String BUILDER_POSITIVE_BUTTON = "BUILDER_POSITIVE_BUTTON";
     private static final String BUILDER_FULL_SCREEN = "BUILDER_FULL_SCREEN";
@@ -45,13 +55,14 @@ public class FullScreenDialogFragment extends DialogFragment {
         f.setArguments(mapBuilderToArguments(builder));
         f.setContent(Fragment.instantiate(builder.context, builder.contentClass.getName(), builder.contentArguments));
         f.setOnConfirmListener(builder.onConfirmListener);
+        f.setOnDiscardListener(builder.onDiscardListener);
         return f;
     }
 
     private static Bundle mapBuilderToArguments(Builder builder) {
         Bundle builderData = new Bundle();
         builderData.putString(BUILDER_TITLE, builder.title);
-        builderData.putString(BUILDER_POSITIVE_BUTTON, builder.positiveButton);
+        builderData.putString(BUILDER_POSITIVE_BUTTON, builder.confirmButton);
         builderData.putBoolean(BUILDER_FULL_SCREEN, builder.fullScreen);
 
         return builderData;
@@ -61,8 +72,13 @@ public class FullScreenDialogFragment extends DialogFragment {
     private String positiveButton;
     private boolean fullScreen;
     private Fragment content;
-    private MenuItem itemPositiveButton;
+
+    private MenuItem itemConfirmButton;
+
     private OnConfirmListener onConfirmListener;
+    private OnDiscardListener onDiscardListener;
+
+    private FullScreenDialogController dialogController;
 
     private void setContent(Fragment content) {
         this.content = content;
@@ -72,8 +88,12 @@ public class FullScreenDialogFragment extends DialogFragment {
         return content;
     }
 
-    public void setOnConfirmListener(OnConfirmListener onConfirmListener) {
+    public void setOnConfirmListener(@Nullable OnConfirmListener onConfirmListener) {
         this.onConfirmListener = onConfirmListener;
+    }
+
+    public void setOnDiscardListener(@Nullable OnDiscardListener onDiscardListener) {
+        this.onDiscardListener = onDiscardListener;
     }
 
     @Override
@@ -83,14 +103,22 @@ public class FullScreenDialogFragment extends DialogFragment {
         if (savedInstanceState != null)
             content = getChildFragmentManager().findFragmentById(R.id.content);
 
-        if (content instanceof DialogConfirmationButtonController)
-            ((DialogConfirmationButtonController) content).setDialogConfirmationButtonStatusController(
-                    new DialogConfirmationButtonController.DialogConfirmationButtonStatusController() {
-                        @Override
-                        public void setEnabled(boolean enabled) {
-                            itemPositiveButton.setEnabled(enabled);
-                        }
-                    });
+        dialogController = new FullScreenDialogController() {
+            @Override
+            public void setConfirmButtonEnabled(boolean enabled) {
+                FullScreenDialogFragment.this.itemConfirmButton.setEnabled(enabled);
+            }
+
+            @Override
+            public void confirm(@Nullable Bundle result) {
+                FullScreenDialogFragment.this.confirm(result);
+            }
+
+            @Override
+            public void discard() {
+                FullScreenDialogFragment.this.discard();
+            }
+        };
     }
 
     @Nullable
@@ -107,6 +135,19 @@ public class FullScreenDialogFragment extends DialogFragment {
 
         if (fullScreen)
             setThemeBackground(view);
+
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+
+        view.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    onDiscardButtonClick();
+                }
+                return false;
+            }
+        });
 
         return view;
     }
@@ -135,7 +176,7 @@ public class FullScreenDialogFragment extends DialogFragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onNegativeButtonClick();
+                onDiscardButtonClick();
             }
         });
 
@@ -144,14 +185,14 @@ public class FullScreenDialogFragment extends DialogFragment {
         Menu menu = toolbar.getMenu();
 
         final int menuItemTitleId = 1;
-        itemPositiveButton = menu.add(0, menuItemTitleId, 0, this.positiveButton);
-        itemPositiveButton.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        itemPositiveButton.setOnMenuItemClickListener(
+        itemConfirmButton = menu.add(0, menuItemTitleId, 0, this.positiveButton);
+        itemConfirmButton.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        itemConfirmButton.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getItemId() == menuItemTitleId) {
-                            onPositiveButtonClick();
+                            onConfirmButtonClick();
                             return true;
                         } else
                             return false;
@@ -166,6 +207,11 @@ public class FullScreenDialogFragment extends DialogFragment {
         a.recycle();
 
         DrawableCompat.setTint(DrawableCompat.wrap(homeButtonDrawable), color);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        ((FullScreenDialogContent) getContent()).onDialogCreated(dialogController);
     }
 
     @Override
@@ -189,28 +235,32 @@ public class FullScreenDialogFragment extends DialogFragment {
                     .setCustomAnimations(R.anim.none, 0, 0, R.anim.none)
                     .add(R.id.content, content)
                     .commitNow();
-
     }
 
-    private void onPositiveButtonClick() {
-        ((OnDialogActionListener) content).onConfirmDialog(new OnDialogActionListener.DialogConfirmActionCallback() {
-            @Override
-            public void onActionConfirmed(@Nullable Bundle result) {
-                if (onConfirmListener != null) {
-                    onConfirmListener.onConfirm(result);
-                }
-                dismiss();
-            }
-        });
+    private void onConfirmButtonClick() {
+        boolean eventConsumed = ((FullScreenDialogContent) content).onConfirmClick(dialogController);
+        if (!eventConsumed)
+            dialogController.confirm(null);
     }
 
-    private void onNegativeButtonClick() {
-        ((OnDialogActionListener) content).onDiscardDialog(new OnDialogActionListener.DialogDiscardActionCallback() {
-            @Override
-            public void onActionConfirmed() {
-                dismiss();
-            }
-        });
+    private void onDiscardButtonClick() {
+        boolean eventConsumed = ((FullScreenDialogContent) content).onDiscardClick(dialogController);
+        if (!eventConsumed)
+            dialogController.discard();
+    }
+
+    private void confirm(Bundle result) {
+        if (onConfirmListener != null) {
+            onConfirmListener.onConfirm(result);
+        }
+        dismiss();
+    }
+
+    private void discard() {
+        if (onDiscardListener != null) {
+            onDiscardListener.onDiscard();
+        }
+        dismiss();
     }
 
     @Override
@@ -288,11 +338,12 @@ public class FullScreenDialogFragment extends DialogFragment {
     public static class Builder {
         private Context context;
         private String title;
-        private String positiveButton;
+        private String confirmButton;
         private boolean fullScreen;
         private Class<? extends Fragment> contentClass;
         private Bundle contentArguments;
         private OnConfirmListener onConfirmListener;
+        private OnDiscardListener onDiscardListener;
 
         public Builder(@NonNull Context context) {
             this.context = context;
@@ -303,29 +354,38 @@ public class FullScreenDialogFragment extends DialogFragment {
             return FullScreenDialogFragment.newInstance(this);
         }
 
-        public Builder title(@NonNull String title) {
-            this.title = title;
+        public Builder title(@NonNull String text) {
+            this.title = text;
             return this;
         }
 
-        public Builder title(@StringRes int title) {
-            this.title = context.getString(title);
+        public Builder title(@StringRes int textResId) {
+            this.title = context.getString(textResId);
             return this;
         }
 
-        public Builder positiveButton(@NonNull String text, @Nullable OnConfirmListener onConfirmListener) {
-            this.positiveButton = text;
+        public Builder confirmButton(@NonNull String text) {
+            this.confirmButton = text;
+            return this;
+        }
+
+        public Builder confirmButton(@StringRes int textResId) {
+            return confirmButton(context.getString(textResId));
+        }
+
+        public Builder onConfirmListener(@Nullable OnConfirmListener onConfirmListener) {
             this.onConfirmListener = onConfirmListener;
             return this;
         }
 
-        public Builder positiveButton(@StringRes int textResId, @Nullable OnConfirmListener onConfirmListener) {
-            return positiveButton(context.getString(textResId), onConfirmListener);
+        public Builder onDiscardListener(@Nullable OnDiscardListener onDiscardListener) {
+            this.onDiscardListener = onDiscardListener;
+            return this;
         }
 
         public Builder content(Class<? extends Fragment> contentClass, @Nullable Bundle contentArguments) {
-            if (!OnDialogActionListener.class.isAssignableFrom(contentClass)) {
-                throw new IllegalArgumentException("The content Fragment must implement OnDialogActionListener interface");
+            if (!FullScreenDialogContent.class.isAssignableFrom(contentClass)) {
+                throw new IllegalArgumentException("The content Fragment must implement FullScreenDialogContent interface");
             }
             this.contentClass = contentClass;
             this.contentArguments = contentArguments;
@@ -336,9 +396,5 @@ public class FullScreenDialogFragment extends DialogFragment {
             this.fullScreen = fullScreen;
             return this;
         }
-    }
-
-    public interface OnConfirmListener {
-        void onConfirm(@Nullable Bundle result);
     }
 }

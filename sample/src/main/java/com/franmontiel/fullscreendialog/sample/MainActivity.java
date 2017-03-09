@@ -7,10 +7,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.franmontiel.fullscreendialog.FullScreenDialogFragment;
 
-public class MainActivity extends AppCompatActivity implements FullScreenDialogFragment.OnConfirmListener {
+public class MainActivity extends AppCompatActivity
+        implements FullScreenDialogFragment.OnConfirmListener, FullScreenDialogFragment.OnDiscardListener {
 
     private TextView fullName;
 
@@ -27,8 +29,10 @@ public class MainActivity extends AppCompatActivity implements FullScreenDialogF
         if (savedInstanceState != null) {
             FullScreenDialogFragment dialogFragment =
                     (FullScreenDialogFragment) getSupportFragmentManager().findFragmentByTag(dialogTag);
-            if (dialogFragment != null)
+            if (dialogFragment != null) {
                 dialogFragment.setOnConfirmListener(this);
+                dialogFragment.setOnDiscardListener(this);
+            }
         }
 
         openDialog.setOnClickListener(new View.OnClickListener() {
@@ -40,9 +44,10 @@ public class MainActivity extends AppCompatActivity implements FullScreenDialogF
 
                 FullScreenDialogFragment dialogFragment = new FullScreenDialogFragment.Builder(MainActivity.this)
                         .title(R.string.insert_surname)
-                        .positiveButton(R.string.dialog_positive_button, MainActivity.this)
+                        .confirmButton(R.string.dialog_positive_button)
+                        .onConfirmListener(MainActivity.this)
+                        .onDiscardListener(MainActivity.this)
                         .content(SurnameFragment.class, args)
-                        .fullScreen(true)
                         .build();
 
                 dialogFragment.show(getSupportFragmentManager(), dialogTag);
@@ -53,5 +58,10 @@ public class MainActivity extends AppCompatActivity implements FullScreenDialogF
     @Override
     public void onConfirm(@Nullable Bundle result) {
         fullName.setText(result.getString(SurnameFragment.RESULT_FULL_NAME));
+    }
+
+    @Override
+    public void onDiscard() {
+        Toast.makeText(MainActivity.this, R.string.dialog_discarded, Toast.LENGTH_SHORT).show();
     }
 }

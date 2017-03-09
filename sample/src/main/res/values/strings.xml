@@ -7,4 +7,8 @@
     <string name="full_name">Full name:</string>
     <string name="dialog_positive_button">Show name</string>
     <string name="hi_name">Hi %s!</string>
+
+    <string name="dialog_discarded">Dialog discarded</string>
+    <string name="discard_confirmation_title">Are you sure?</string>
+    <string name="discard_confirmation_message">Please confirm that you want to exit?</string>
 </resources>
