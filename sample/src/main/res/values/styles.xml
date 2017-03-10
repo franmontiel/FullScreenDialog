@@ -9,7 +9,6 @@
 
     <style name="FullScreenDialogToolbar">
         <item name="android:background">@color/colorPrimaryDark</item>
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark</item>
     </style>
 </resources>

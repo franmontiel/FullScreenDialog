@@ -34,14 +34,20 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 /**
- * Created by fj on 24/02/17.
+ * A DialogFragment that implements the Full-screen dialog pattern defined in
+ * <a href="https://material.io/guidelines/components/dialogs.html#dialogs-full-screen-dialogs">the Material Design guidelines</a>
  */
 public class FullScreenDialogFragment extends DialogFragment {
-
+    /**
+     * Callback that will be called when the dialog is closed due to a confirm button click.
+     */
     public interface OnConfirmListener {
         void onConfirm(@Nullable Bundle result);
     }
 
+    /**
+     * Callback that will be called when the dialog is closed due a discard button click or the system back button click.
+     */
     public interface OnDiscardListener {
         void onDiscard();
     }
@@ -84,14 +90,29 @@ public class FullScreenDialogFragment extends DialogFragment {
         this.content = content;
     }
 
+    /**
+     * Get the content {@link Fragment} to be able to interact directly with it.
+     *
+     * @return The content @{@link Fragment} of the dialog
+     */
     public Fragment getContent() {
         return content;
     }
 
+    /**
+     * Sets the callback that will be called when the dialog is closed due to a confirm button click.
+     *
+     * @param onConfirmListener
+     */
     public void setOnConfirmListener(@Nullable OnConfirmListener onConfirmListener) {
         this.onConfirmListener = onConfirmListener;
     }
 
+    /**
+     * Sets the callback that will be called when the dialog is closed due a discard button click or the system back button click.
+     *
+     * @param onDiscardListener
+     */
     public void setOnDiscardListener(@Nullable OnDiscardListener onDiscardListener) {
         this.onDiscardListener = onDiscardListener;
     }
@@ -143,9 +164,11 @@ public class FullScreenDialogFragment extends DialogFragment {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    onDiscardButtonClick();
-                }
-                return false;
+                    if (event.getAction() == KeyEvent.ACTION_UP)
+                        onDiscardButtonClick();
+                    return true;
+                } else
+                    return false;
             }
         });
 
@@ -345,54 +368,90 @@ public class FullScreenDialogFragment extends DialogFragment {
         private OnConfirmListener onConfirmListener;
         private OnDiscardListener onDiscardListener;
 
+        /**
+         * Builder to construct a {@link FullScreenDialogFragment}.
+         *
+         * @param context
+         */
         public Builder(@NonNull Context context) {
             this.context = context;
             this.fullScreen = true;
         }
 
+        /**
+         * Creates a {@link FullScreenDialogFragment} with the provided parameters.
+         *
+         * @return the created instance of {@link FullScreenDialogFragment}
+         */
         public FullScreenDialogFragment build() {
             return FullScreenDialogFragment.newInstance(this);
         }
 
-        public Builder title(@NonNull String text) {
+        public Builder setTitle(@NonNull String text) {
             this.title = text;
             return this;
         }
 
-        public Builder title(@StringRes int textResId) {
+        public Builder setTitle(@StringRes int textResId) {
             this.title = context.getString(textResId);
             return this;
         }
 
-        public Builder confirmButton(@NonNull String text) {
+        public Builder setConfirmButton(@NonNull String text) {
             this.confirmButton = text;
             return this;
         }
 
-        public Builder confirmButton(@StringRes int textResId) {
-            return confirmButton(context.getString(textResId));
+        public Builder setConfirmButton(@StringRes int textResId) {
+            return setConfirmButton(context.getString(textResId));
         }
 
-        public Builder onConfirmListener(@Nullable OnConfirmListener onConfirmListener) {
+        /**
+         * Sets the callback that will be called when the dialog is closed due to a confirm button click.
+         *
+         * @param onConfirmListener
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnConfirmListener(@Nullable OnConfirmListener onConfirmListener) {
             this.onConfirmListener = onConfirmListener;
             return this;
         }
 
-        public Builder onDiscardListener(@Nullable OnDiscardListener onDiscardListener) {
+        /**
+         * Sets the callback that will be called when the dialog is closed due a discard button click or the system back button click.
+         *
+         * @param onDiscardListener
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnDiscardListener(@Nullable OnDiscardListener onDiscardListener) {
             this.onDiscardListener = onDiscardListener;
             return this;
         }
 
-        public Builder content(Class<? extends Fragment> contentClass, @Nullable Bundle contentArguments) {
+        /**
+         * Sets the {@link Fragment} that will be added as the content of the dialog. This fragment must implements {@link FullScreenDialogContent}.
+         *
+         * @param contentClass     the content class that will be instantiated
+         * @param contentArguments the arguments to add to the content
+         * @return This Builder object to allow for chaining of calls to set methods
+         * @throws IllegalArgumentException if the contentClass does not implement the {@link FullScreenDialogContent} interface
+         */
+        public Builder setContent(Class<? extends Fragment> contentClass, @Nullable Bundle contentArguments) {
             if (!FullScreenDialogContent.class.isAssignableFrom(contentClass)) {
-                throw new IllegalArgumentException("The content Fragment must implement FullScreenDialogContent interface");
+                throw new IllegalArgumentException("The setContent Fragment must implement FullScreenDialogContent interface");
             }
             this.contentClass = contentClass;
             this.contentArguments = contentArguments;
             return this;
         }
 
-        public Builder fullScreen(boolean fullScreen) {
+        /**
+         * Sets if the dialog will be shown in full-screen (the default value if this method is not invoked) or using the default dialog window.
+         *
+         * @param fullScreen
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setFullScreen(boolean fullScreen) {
             this.fullScreen = fullScreen;
             return this;
         }

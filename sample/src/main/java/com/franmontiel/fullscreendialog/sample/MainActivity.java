@@ -43,11 +43,11 @@ public class MainActivity extends AppCompatActivity
                 name.setText("");
 
                 FullScreenDialogFragment dialogFragment = new FullScreenDialogFragment.Builder(MainActivity.this)
-                        .title(R.string.insert_surname)
-                        .confirmButton(R.string.dialog_positive_button)
-                        .onConfirmListener(MainActivity.this)
-                        .onDiscardListener(MainActivity.this)
-                        .content(SurnameFragment.class, args)
+                        .setTitle(R.string.insert_surname)
+                        .setConfirmButton(R.string.dialog_positive_button)
+                        .setOnConfirmListener(MainActivity.this)
+                        .setOnDiscardListener(MainActivity.this)
+                        .setContent(SurnameFragment.class, args)
                         .build();
 
                 dialogFragment.show(getSupportFragmentManager(), dialogTag);
