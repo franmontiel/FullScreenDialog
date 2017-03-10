@@ -36,7 +36,7 @@ new FullScreenDialogFragment.Builder(MainActivity.this)
 ### The content
 The content of the dialog must be a `Fragment` that implements the `FullScreenDialogContent` interface.
 
-The content will be wrapped by the FullScreenDialogFragment. This allows to use as a dialog any Fragment without the need of making it inherit from DialogFragment.
+The content will be wrapped by the `FullScreenDialogFragment`. This allows to use as a dialog any `Fragment` without the need of making it inherit from `DialogFragment`.
 
 Through the `FullScreenDialogContent` interface the content Fragment is able to receive events and control the dialog.
 
