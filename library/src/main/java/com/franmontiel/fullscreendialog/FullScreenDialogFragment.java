@@ -229,7 +229,12 @@ public class FullScreenDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         initBuilderArguments();
 
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        Dialog dialog = new Dialog(getActivity(), getTheme()) {
+            @Override
+            public void onBackPressed() {
+                onDiscardButtonClick();
+            }
+        };
         if (!fullScreen)
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 

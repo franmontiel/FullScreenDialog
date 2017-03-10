@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity
                         .setOnConfirmListener(MainActivity.this)
                         .setOnDiscardListener(MainActivity.this)
                         .setContent(SurnameFragment.class, args)
+                        .setFullScreen(false)
                         .build();
 
                 dialogFragment.show(getSupportFragmentManager(), dialogTag);
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (dialogFragment != null && dialogFragment.isVisible()) {
+        if (dialogFragment != null && dialogFragment.isAdded()) {
             dialogFragment.onBackPressed();
         } else {
             super.onBackPressed();

@@ -18,7 +18,7 @@ allprojects {
 Step 2. Add the dependency
 ```groovy
 dependencies {
-        compile 'com.github.franmontiel:FullScreenDialog:1.0'
+        compile 'com.github.franmontiel:FullScreenDialog:1.0.1'
 }
 ```
 Usage
@@ -36,10 +36,14 @@ new FullScreenDialogFragment.Builder(MainActivity.this)
 ### The content
 The content of the dialog must be a `Fragment` that implements the `FullScreenDialogContent` interface.
 
+The content will be wrapped by the FullScreenDialogFragment. This allows to use as a dialog any Fragment without the need of making it inherit from DialogFragment.
+
 Through the `FullScreenDialogContent` interface the content Fragment is able to receive events and control the dialog.
 
 ### Styling the dialog
-It is possible to style the dialog Toolbar creating a style called `FullScreenDialogToolbar`
+It is possible to show the dialog in a default dialog window calling `setFullScreen(false)` on the `Builder`.
+
+To style the dialog Toolbar a style called `FullScreenDialogToolbar` must be created.
 ```xml
 <style name="FullScreenDialogToolbar">
     <item name="android:background">@color/colorPrimaryDark</item>
@@ -53,11 +57,11 @@ To be notified when the dialog is closed due to a confirmation or a dismiss acti
 `FullScreenDialogContent` interface allows the content Fragment to receive the dialog click events through the `onConfirmClick` and `onDiscardClick` methods.
 
 ### Back key press handling
-To manage the back key press as if it where a press in the discard button the method `onBackPressed()` of `FullScreenDialogFragment` should be invoked from the Activity method of the same name.
+To notify the back key press to the dialog, what will fire the discard button click event notification to the content, the `onBackPressed` method of `FullScreenDialogFragment` must be invoked from the Activity method of the same name. This is only needed if the dialog is in fullscreen due to the Fragments lack of ability to detect back key press.
 ```java
 @Override
 public void onBackPressed() {
-    if (dialogFragment != null && dialogFragment.isVisible()) {
+    if (dialogFragment != null && dialogFragment.isAdded()) {
         dialogFragment.onBackPressed();
     } else {
         super.onBackPressed();
