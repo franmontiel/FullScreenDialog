@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity
                         .setOnConfirmListener(MainActivity.this)
                         .setOnDiscardListener(MainActivity.this)
                         .setContent(SurnameFragment.class, args)
-                        .setFullScreen(false)
                         .build();
 
                 dialogFragment.show(getSupportFragmentManager(), dialogTag);
