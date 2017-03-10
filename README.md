@@ -2,7 +2,7 @@ FullScreenDialog
 =================
 A DialogFragment that implements the Full-screen dialog pattern defined in [the Material Design guidelines] [1].
 
-![FullScreenDialog Sample](https://github.com/franmontiel/FullScreenDialog/raw/master/fullscreendialog.gif)
+![FullScreenDialog Sample GIF](https://github.com/franmontiel/FullScreenDialog/raw/master/fullscreendialog.gif)
 
 Download
 --------
@@ -53,7 +53,7 @@ To be notified when the dialog is closed due to a confirmation or a dismiss acti
 `FullScreenDialogContent` interface allows the content Fragment to receive the dialog click events through the `onConfirmClick` and `onDiscardClick` methods.
 
 ### Back key press handling
-To manage the back key press as if it where a press in the discard button the FullScreenDialogFragment method `onBackPressed()` should be invoked from the Activity method of the same name.
+To manage the back key press as if it where a press in the discard button the method `onBackPressed()` of `FullScreenDialogFragment` should be invoked from the Activity method of the same name.
 ```java
 @Override
 public void onBackPressed() {
