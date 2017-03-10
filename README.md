@@ -23,7 +23,7 @@ dependencies {
 ```
 Usage
 -----
-Just create a new `FullScreenDialogFragment` using the `Builder`:
+Just create a new `FullScreenDialogFragment` using the `Builder`
 ```java
 new FullScreenDialogFragment.Builder(MainActivity.this)
                         .setTitle(R.string.dialog_title)
@@ -41,7 +41,6 @@ Through the `FullScreenDialogContent` interface the content Fragment is able to 
 ### Styling the dialog
 It is possible to style the dialog Toolbar creating a style called `FullScreenDialogToolbar`
 ```xml
-
 <style name="FullScreenDialogToolbar">
     <item name="android:background">@color/colorPrimaryDark</item>
     <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark</item>
@@ -53,6 +52,18 @@ To be notified when the dialog is closed due to a confirmation or a dismiss acti
 
 `FullScreenDialogContent` interface allows the content Fragment to receive the dialog click events through the `onConfirmClick` and `onDiscardClick` methods.
 
+### Back key press handling
+To manage the back key press as if it where a press in the discard button the FullScreenDialogFragment method `onBackPressed()` should be invoked from the Activity method of the same name.
+```java
+@Override
+public void onBackPressed() {
+    if (dialogFragment != null && dialogFragment.isVisible()) {
+        dialogFragment.onBackPressed();
+    } else {
+        super.onBackPressed();
+    }
+}
+```
 License
 -------
     Copyright (C) 2017 Francisco José Montiel Navarro
