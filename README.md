@@ -2,7 +2,7 @@ FullScreenDialog
 =================
 A DialogFragment that implements the Full-screen dialog pattern defined in [the Material Design guidelines] [1].
 
-![](https://github.com/franmontiel/FullScreenDialog/raw/master/fullscreendialog.gif)
+![FullScreenDialog Sample](https://github.com/franmontiel/FullScreenDialog/raw/master/fullscreendialog.gif)
 
 Download
 --------
@@ -51,7 +51,7 @@ It is possible to style the dialog Toolbar creating a style called `FullScreenDi
 ### Listening to events
 To be notified when the dialog is closed due to a confirmation or a dismiss action it is possible set a `OnConfirmListener` and a `OnDiscardListener`.
 
-`FullScreenDialogContent` interface allows the content Fragment to receive the dialog on click events through the `onConfirmClick` and `onDiscardClick` methods.
+`FullScreenDialogContent` interface allows the content Fragment to receive the dialog click events through the `onConfirmClick` and `onDiscardClick` methods.
 
 License
 -------
