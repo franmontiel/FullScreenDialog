@@ -2,6 +2,7 @@ package com.franmontiel.fullscreendialog;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
@@ -25,7 +26,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.WindowDecorActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,7 +46,7 @@ public class FullScreenDialogFragment extends DialogFragment {
     }
 
     /**
-     * Callback that will be called when the dialog is closed due a discard button click or the system back button click.
+     * Callback that will be called when the dialog is closed due a discard button click.
      */
     public interface OnDiscardListener {
         void onDiscard();
@@ -109,7 +109,7 @@ public class FullScreenDialogFragment extends DialogFragment {
     }
 
     /**
-     * Sets the callback that will be called when the dialog is closed due a discard button click or the system back button click.
+     * Sets the callback that will be called when the dialog is closed due a discard button click.
      *
      * @param onDiscardListener
      */
@@ -150,7 +150,7 @@ public class FullScreenDialogFragment extends DialogFragment {
         if (fullScreen)
             hideActivityActionBar(savedInstanceState == null);
 
-        View view = inflater.inflate(R.layout.full_screen_dialog, container, false);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.full_screen_dialog, container, false);
 
         initToolbar(view);
 
@@ -159,18 +159,6 @@ public class FullScreenDialogFragment extends DialogFragment {
 
         view.setFocusableInTouchMode(true);
         view.requestFocus();
-
-        view.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    if (event.getAction() == KeyEvent.ACTION_UP)
-                        onDiscardButtonClick();
-                    return true;
-                } else
-                    return false;
-            }
-        });
 
         return view;
     }
@@ -358,6 +346,14 @@ public class FullScreenDialogFragment extends DialogFragment {
         fullScreen = builderData.getBoolean(BUILDER_FULL_SCREEN, true);
     }
 
+    /**
+     * Method intented to be called from the {@link Activity#onBackPressed()} the back button press will be processed as a discard button click.
+     */
+    public void onBackPressed() {
+        if (isAdded())
+            onDiscardButtonClick();
+    }
+
     public static class Builder {
         private Context context;
         private String title;
@@ -418,7 +414,7 @@ public class FullScreenDialogFragment extends DialogFragment {
         }
 
         /**
-         * Sets the callback that will be called when the dialog is closed due a discard button click or the system back button click.
+         * Sets the callback that will be called when the dialog is closed due a discard button click.
          *
          * @param onDiscardListener
          * @return This Builder object to allow for chaining of calls to set methods

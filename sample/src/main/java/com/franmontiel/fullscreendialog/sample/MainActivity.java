@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity
         implements FullScreenDialogFragment.OnConfirmListener, FullScreenDialogFragment.OnDiscardListener {
 
     private TextView fullName;
+    private FullScreenDialogFragment dialogFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity
 
         final String dialogTag = "dialog";
         if (savedInstanceState != null) {
-            FullScreenDialogFragment dialogFragment =
+            dialogFragment =
                     (FullScreenDialogFragment) getSupportFragmentManager().findFragmentByTag(dialogTag);
             if (dialogFragment != null) {
                 dialogFragment.setOnConfirmListener(this);
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity
                 args.putString(SurnameFragment.EXTRA_NAME, name.getText().toString());
                 name.setText("");
 
-                FullScreenDialogFragment dialogFragment = new FullScreenDialogFragment.Builder(MainActivity.this)
+                dialogFragment = new FullScreenDialogFragment.Builder(MainActivity.this)
                         .setTitle(R.string.insert_surname)
                         .setConfirmButton(R.string.dialog_positive_button)
                         .setOnConfirmListener(MainActivity.this)
@@ -63,5 +64,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDiscard() {
         Toast.makeText(MainActivity.this, R.string.dialog_discarded, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (dialogFragment != null && dialogFragment.isVisible()) {
+            dialogFragment.onBackPressed();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

@@ -20,7 +20,7 @@ public interface FullScreenDialogContent {
     boolean onConfirmClick(FullScreenDialogController dialogController);
 
     /**
-     * Called when the discard button or the back button is clicked.
+     * Called when the discard button is clicked.
      *
      * @param dialogController that allows to control the container dialog
      * @return true if the event has been consumed, false otherwise

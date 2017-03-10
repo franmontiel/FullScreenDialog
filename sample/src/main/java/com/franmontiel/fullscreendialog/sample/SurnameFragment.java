@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,13 +31,11 @@ public class SurnameFragment extends Fragment implements FullScreenDialogContent
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d("dialog", "onCreateView");
         return inflater.inflate(R.layout.surname_fragment, container, false);
     }
 
     @Override
     public void onDialogCreated(final FullScreenDialogController dialogController) {
-        Log.d("dialog", "onDialogCreated");
         this.dialogController = dialogController;
     }
 
