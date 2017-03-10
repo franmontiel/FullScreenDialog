@@ -2,7 +2,7 @@ FullScreenDialog
 =================
 A DialogFragment that implements the Full-screen dialog pattern defined in [the Material Design guidelines] [1].
 
-![alt text](https://github.com/franmontiel/PersistentCookieJar/raw/master/fullscreendialog.gif)
+![](https://github.com/franmontiel/FullScreenDialog/raw/master/fullscreendialog.gif)
 
 Download
 --------
