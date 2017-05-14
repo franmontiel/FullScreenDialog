@@ -1,6 +1,6 @@
 FullScreenDialog
 =================
-A DialogFragment that implements the Full-screen dialog pattern defined in [the Material Design guidelines] [1].
+A DialogFragment that implements the Full-screen dialog pattern defined in [the Material Design guidelines](https://material.io/guidelines/components/dialogs.html#dialogs-full-screen-dialogs).
 
 ![FullScreenDialog Sample GIF](https://github.com/franmontiel/FullScreenDialog/raw/master/fullscreendialog.gif)
 
@@ -83,6 +83,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-
-[1]: https://material.io/guidelines/components/dialogs.html#dialogs-full-screen-dialogs
