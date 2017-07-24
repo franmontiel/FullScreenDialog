@@ -43,5 +43,8 @@ public interface FullScreenDialogController {
      */
     void discard();
 
+    // TODO Add Javadoc
+    void discardFromExtraAction(int actionId, @Nullable Bundle result);
+
 
 }

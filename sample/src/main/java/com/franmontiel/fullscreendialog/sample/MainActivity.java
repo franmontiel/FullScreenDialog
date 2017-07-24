@@ -12,7 +12,9 @@ import android.widget.Toast;
 import com.franmontiel.fullscreendialog.FullScreenDialogFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements FullScreenDialogFragment.OnConfirmListener, FullScreenDialogFragment.OnDiscardListener {
+        implements FullScreenDialogFragment.OnConfirmListener,
+        FullScreenDialogFragment.OnDiscardListener,
+        FullScreenDialogFragment.OnDiscardFromExtraActionListener {
 
     private TextView fullName;
     private FullScreenDialogFragment dialogFragment;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity
             if (dialogFragment != null) {
                 dialogFragment.setOnConfirmListener(this);
                 dialogFragment.setOnDiscardListener(this);
+                dialogFragment.setOnDiscardFromExtraActionListener(this);
             }
         }
 
@@ -49,6 +52,8 @@ public class MainActivity extends AppCompatActivity
                         .setOnConfirmListener(MainActivity.this)
                         .setOnDiscardListener(MainActivity.this)
                         .setContent(SurnameFragment.class, args)
+                        .setExtraActions(R.menu.extra_items)
+                        .setOnDiscardFromActionListener(MainActivity.this)
                         .build();
 
                 dialogFragment.show(getSupportFragmentManager(), dialogTag);
@@ -67,6 +72,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onDiscardFromExtraAction(int actionId, @Nullable Bundle result) {
+        Toast.makeText(MainActivity.this, String.valueOf(actionId), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onBackPressed() {
         if (dialogFragment != null && dialogFragment.isAdded()) {
             dialogFragment.onBackPressed();
@@ -74,4 +84,6 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
+
+
 }

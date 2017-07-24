@@ -15,6 +15,8 @@
  */
 package com.franmontiel.fullscreendialog;
 
+import android.view.MenuItem;
+
 /**
  * Interface that the content {@link android.support.v4.app.Fragment} must implement. It allows to control over the container dialog.
  */
@@ -41,5 +43,8 @@ public interface FullScreenDialogContent {
      * @return true if the event has been consumed, false otherwise
      */
     boolean onDiscardClick(FullScreenDialogController dialogController);
+
+    // TODO Add Javadoc
+    boolean onExtraActionClick(MenuItem actionItem, FullScreenDialogController dialogController);
 }
 

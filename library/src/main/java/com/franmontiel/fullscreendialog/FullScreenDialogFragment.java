@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -67,9 +68,19 @@ public class FullScreenDialogFragment extends DialogFragment {
         void onDiscard();
     }
 
+    // TODO Add Javadoc
+    public interface OnDiscardFromExtraActionListener {
+        void onDiscardFromExtraAction(int actionId, @Nullable Bundle result);
+    }
+
+    public interface OnExtraItemsClickListener {
+        void onClick(int itemId);
+    }
+
     private static final String BUILDER_TITLE = "BUILDER_TITLE";
     private static final String BUILDER_POSITIVE_BUTTON = "BUILDER_POSITIVE_BUTTON";
     private static final String BUILDER_FULL_SCREEN = "BUILDER_FULL_SCREEN";
+    private static final String BUILDER_EXTRA_ITEMS = "BUILDER_EXTRA_ITEMS";
 
     private static FullScreenDialogFragment newInstance(Builder builder) {
         FullScreenDialogFragment f = new FullScreenDialogFragment();
@@ -77,6 +88,7 @@ public class FullScreenDialogFragment extends DialogFragment {
         f.setContent(Fragment.instantiate(builder.context, builder.contentClass.getName(), builder.contentArguments));
         f.setOnConfirmListener(builder.onConfirmListener);
         f.setOnDiscardListener(builder.onDiscardListener);
+        f.setOnDiscardFromExtraActionListener(builder.onDiscardFromActionListener);
         return f;
     }
 
@@ -85,7 +97,7 @@ public class FullScreenDialogFragment extends DialogFragment {
         builderData.putString(BUILDER_TITLE, builder.title);
         builderData.putString(BUILDER_POSITIVE_BUTTON, builder.confirmButton);
         builderData.putBoolean(BUILDER_FULL_SCREEN, builder.fullScreen);
-
+        builderData.putInt(BUILDER_EXTRA_ITEMS, builder.extraActionsMenuResId);
         return builderData;
     }
 
@@ -93,11 +105,14 @@ public class FullScreenDialogFragment extends DialogFragment {
     private String positiveButton;
     private boolean fullScreen;
     private Fragment content;
+    private int extraItemsResId;
+    private static final int NO_EXTRA_ITEMS = 0;
 
     private MenuItem itemConfirmButton;
 
     private OnConfirmListener onConfirmListener;
     private OnDiscardListener onDiscardListener;
+    private OnDiscardFromExtraActionListener onDiscardFromExtraActionListener;
 
     private FullScreenDialogController dialogController;
 
@@ -132,6 +147,11 @@ public class FullScreenDialogFragment extends DialogFragment {
         this.onDiscardListener = onDiscardListener;
     }
 
+    // TODO Add Javadoc
+    public void setOnDiscardFromExtraActionListener(@Nullable OnDiscardFromExtraActionListener onDiscardFromExtraActionListener) {
+        this.onDiscardFromExtraActionListener = onDiscardFromExtraActionListener;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -153,6 +173,11 @@ public class FullScreenDialogFragment extends DialogFragment {
             @Override
             public void discard() {
                 FullScreenDialogFragment.this.discard();
+            }
+
+            @Override
+            public void discardFromExtraAction(int actionId, @Nullable Bundle result) {
+                FullScreenDialogFragment.this.discardFromExtraAction(actionId, result);
             }
         };
     }
@@ -196,7 +221,7 @@ public class FullScreenDialogFragment extends DialogFragment {
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
 
         Drawable closeDrawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_close);
-        tintToolbarHomeButton(toolbar, closeDrawable);
+        tintToolbarButton(toolbar, closeDrawable);
 
         toolbar.setNavigationIcon(closeDrawable);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -210,29 +235,50 @@ public class FullScreenDialogFragment extends DialogFragment {
 
         Menu menu = toolbar.getMenu();
 
-        final int menuItemTitleId = 1;
-        itemConfirmButton = menu.add(0, menuItemTitleId, 0, this.positiveButton);
+        final int itemConfirmButtonId = 1;
+        itemConfirmButton = menu.add(0, itemConfirmButtonId, 0, this.positiveButton);
         itemConfirmButton.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         itemConfirmButton.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getItemId() == menuItemTitleId) {
+                        if (item.getItemId() == itemConfirmButtonId) {
                             onConfirmButtonClick();
                             return true;
                         } else
                             return false;
                     }
                 });
+
+        if (extraItemsResId != NO_EXTRA_ITEMS) {
+            toolbar.inflateMenu(extraItemsResId);
+            for (int position = 0; position < toolbar.getMenu().size(); position++) {
+                final MenuItem extraItem = toolbar.getMenu().getItem(position);
+                if (extraItem.getItemId() != itemConfirmButtonId && extraItem.getItemId() != android.R.id.home) {
+                    extraItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                    extraItem.setOnMenuItemClickListener(
+                            new MenuItem.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    if (item.getItemId() == extraItem.getItemId()) {
+                                        onExtraActionClick(item);
+                                        return true;
+                                    } else
+                                        return false;
+                                }
+                            });
+                }
+            }
+        }
     }
 
-    private void tintToolbarHomeButton(Toolbar toolbar, Drawable homeButtonDrawable) {
+    private void tintToolbarButton(Toolbar toolbar, Drawable buttonDrawable) {
         int[] colorAttrs = new int[]{R.attr.colorControlNormal};
         TypedArray a = toolbar.getContext().obtainStyledAttributes(colorAttrs);
         int color = a.getColor(0, -1);
         a.recycle();
 
-        DrawableCompat.setTint(DrawableCompat.wrap(homeButtonDrawable), color);
+        DrawableCompat.setTint(DrawableCompat.wrap(buttonDrawable), color);
     }
 
     @Override
@@ -280,6 +326,12 @@ public class FullScreenDialogFragment extends DialogFragment {
             dialogController.discard();
     }
 
+    private void onExtraActionClick(MenuItem actionItem) {
+        boolean eventConsumed = ((FullScreenDialogContent) content).onExtraActionClick(actionItem, dialogController);
+        if (!eventConsumed)
+            dialogController.discardFromExtraAction(actionItem.getItemId(), null);
+    }
+
     private void confirm(Bundle result) {
         if (onConfirmListener != null) {
             onConfirmListener.onConfirm(result);
@@ -290,6 +342,13 @@ public class FullScreenDialogFragment extends DialogFragment {
     private void discard() {
         if (onDiscardListener != null) {
             onDiscardListener.onDiscard();
+        }
+        dismiss();
+    }
+
+    private void discardFromExtraAction(int actionId, Bundle result) {
+        if (onDiscardFromExtraActionListener != null) {
+            onDiscardFromExtraActionListener.onDiscardFromExtraAction(actionId, result);
         }
         dismiss();
     }
@@ -364,6 +423,7 @@ public class FullScreenDialogFragment extends DialogFragment {
         title = builderData.getString(BUILDER_TITLE);
         positiveButton = builderData.getString(BUILDER_POSITIVE_BUTTON);
         fullScreen = builderData.getBoolean(BUILDER_FULL_SCREEN, true);
+        extraItemsResId = builderData.getInt(BUILDER_EXTRA_ITEMS, NO_EXTRA_ITEMS);
     }
 
     /**
@@ -378,11 +438,14 @@ public class FullScreenDialogFragment extends DialogFragment {
         private Context context;
         private String title;
         private String confirmButton;
+        private int extraActionsMenuResId;
         private boolean fullScreen;
         private Class<? extends Fragment> contentClass;
         private Bundle contentArguments;
         private OnConfirmListener onConfirmListener;
         private OnDiscardListener onDiscardListener;
+        private OnDiscardFromExtraActionListener onDiscardFromActionListener;
+
 
         /**
          * Builder to construct a {@link FullScreenDialogFragment}.
@@ -422,6 +485,11 @@ public class FullScreenDialogFragment extends DialogFragment {
             return setConfirmButton(context.getString(textResId));
         }
 
+        public Builder setExtraActions(@MenuRes int menuResId) {
+            this.extraActionsMenuResId = menuResId;
+            return this;
+        }
+
         /**
          * Sets the callback that will be called when the dialog is closed due to a confirm button click.
          *
@@ -441,6 +509,12 @@ public class FullScreenDialogFragment extends DialogFragment {
          */
         public Builder setOnDiscardListener(@Nullable OnDiscardListener onDiscardListener) {
             this.onDiscardListener = onDiscardListener;
+            return this;
+        }
+
+        // TODO Add Javadoc
+        public Builder setOnDiscardFromActionListener(@Nullable OnDiscardFromExtraActionListener onDiscardFromActionListener) {
+            this.onDiscardFromActionListener = onDiscardFromActionListener;
             return this;
         }
 
