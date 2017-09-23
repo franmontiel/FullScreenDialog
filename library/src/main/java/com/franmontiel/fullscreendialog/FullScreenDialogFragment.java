@@ -58,6 +58,10 @@ public class FullScreenDialogFragment extends DialogFragment {
      * Callback that will be called when the dialog is closed due to a confirm button click.
      */
     public interface OnConfirmListener {
+        /**
+         * Called when dialog is closed due to a confirm button click.
+         * @param result optional bundle with result data
+         */
         void onConfirm(@Nullable Bundle result);
     }
 
@@ -65,16 +69,22 @@ public class FullScreenDialogFragment extends DialogFragment {
      * Callback that will be called when the dialog is closed due a discard button click.
      */
     public interface OnDiscardListener {
+        /**
+         * Called when the dialog is closed due a discard button click.
+         */
         void onDiscard();
     }
 
-    // TODO Add Javadoc
+    /**
+     * Callback that will be called when the dialog is closed due to an extra action (different from confirm or discard).
+     */
     public interface OnDiscardFromExtraActionListener {
+        /**
+         * Called when the dialog is closed due to an extra action.
+         * @param actionId menu item id to identify the action
+         * @param result optional bundle with result data
+         */
         void onDiscardFromExtraAction(int actionId, @Nullable Bundle result);
-    }
-
-    public interface OnExtraItemsClickListener {
-        void onClick(int itemId);
     }
 
     private static final String BUILDER_TITLE = "BUILDER_TITLE";
@@ -147,7 +157,10 @@ public class FullScreenDialogFragment extends DialogFragment {
         this.onDiscardListener = onDiscardListener;
     }
 
-    // TODO Add Javadoc
+    /**
+     * Sets the callback that will be called when the dialog is closed due a extra action button click.
+     * @param onDiscardFromExtraActionListener
+     */
     public void setOnDiscardFromExtraActionListener(@Nullable OnDiscardFromExtraActionListener onDiscardFromExtraActionListener) {
         this.onDiscardFromExtraActionListener = onDiscardFromExtraActionListener;
     }
@@ -427,7 +440,7 @@ public class FullScreenDialogFragment extends DialogFragment {
     }
 
     /**
-     * Method intented to be called from the {@link Activity#onBackPressed()} the back button press will be processed as a discard button click.
+     * Method intended to be called from the {@link Activity#onBackPressed()} the back button press will be processed as a discard button click.
      */
     public void onBackPressed() {
         if (isAdded())
@@ -512,7 +525,11 @@ public class FullScreenDialogFragment extends DialogFragment {
             return this;
         }
 
-        // TODO Add Javadoc
+        /**
+         * Sets the callback that will be called when the dialog is closed due a extra action button click.
+         * @param onDiscardFromActionListener
+         * @return This Builder object to allow for chaining of calls to set methods
+         */
         public Builder setOnDiscardFromActionListener(@Nullable OnDiscardFromExtraActionListener onDiscardFromActionListener) {
             this.onDiscardFromActionListener = onDiscardFromActionListener;
             return this;

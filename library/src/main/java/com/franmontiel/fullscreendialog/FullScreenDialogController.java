@@ -33,7 +33,7 @@ public interface FullScreenDialogController {
     /**
      * Closes the dialog with a confirm action. {@link com.franmontiel.fullscreendialog.FullScreenDialogFragment.OnConfirmListener} will be called.
      *
-     * @param result optional bundle with result that will be passed to the
+     * @param result optional bundle with result data that will be passed to the
      *               {@link com.franmontiel.fullscreendialog.FullScreenDialogFragment.OnConfirmListener} callback
      */
     void confirm(@Nullable Bundle result);
@@ -43,7 +43,13 @@ public interface FullScreenDialogController {
      */
     void discard();
 
-    // TODO Add Javadoc
+    /**
+     * Closes de dialog from extra action. {@link com.franmontiel.fullscreendialog.FullScreenDialogFragment.OnDiscardFromExtraActionListener} will be called
+     *
+     * @param actionId menu item id to identify the action
+     * @param result   optional bundle with result data that will be passed to the
+     *                 {@link com.franmontiel.fullscreendialog.FullScreenDialogFragment.OnDiscardFromExtraActionListener} callback
+     */
     void discardFromExtraAction(int actionId, @Nullable Bundle result);
 
 

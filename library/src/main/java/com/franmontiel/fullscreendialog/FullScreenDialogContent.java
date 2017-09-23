@@ -31,7 +31,7 @@ public interface FullScreenDialogContent {
     /**
      * Called when the confirm button is clicked.
      *
-     * @param dialogController that allows to control the container dialog
+     * @param dialogController allows to control the container dialog
      * @return true if the event has been consumed, false otherwise
      */
     boolean onConfirmClick(FullScreenDialogController dialogController);
@@ -39,12 +39,17 @@ public interface FullScreenDialogContent {
     /**
      * Called when the discard button is clicked.
      *
-     * @param dialogController that allows to control the container dialog
+     * @param dialogController allows to control the container dialog
      * @return true if the event has been consumed, false otherwise
      */
     boolean onDiscardClick(FullScreenDialogController dialogController);
 
-    // TODO Add Javadoc
+    /**
+     * Called when a extra action button is clicked.
+     * @param actionItem menu item id to identify the action
+     * @param dialogController allows to control the container dialog
+     * @return true if the event has been consumed, false otherwise
+     */
     boolean onExtraActionClick(MenuItem actionItem, FullScreenDialogController dialogController);
 }
 
