@@ -52,8 +52,8 @@ public class MainActivity extends AppCompatActivity
                         .setOnConfirmListener(MainActivity.this)
                         .setOnDiscardListener(MainActivity.this)
                         .setContent(SurnameFragment.class, args)
-                        .setExtraActions(R.menu.extra_items)
-                        .setOnDiscardFromActionListener(MainActivity.this)
+//                        .setExtraActions(R.menu.extra_items)
+//                        .setOnDiscardFromActionListener(MainActivity.this)
                         .build();
 
                 dialogFragment.show(getSupportFragmentManager(), dialogTag);

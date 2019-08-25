@@ -60,6 +60,7 @@ public class FullScreenDialogFragment extends DialogFragment {
     public interface OnConfirmListener {
         /**
          * Called when dialog is closed due to a confirm button click.
+         *
          * @param result optional bundle with result data
          */
         void onConfirm(@Nullable Bundle result);
@@ -81,8 +82,9 @@ public class FullScreenDialogFragment extends DialogFragment {
     public interface OnDiscardFromExtraActionListener {
         /**
          * Called when the dialog is closed due to an extra action.
+         *
          * @param actionId menu item id to identify the action
-         * @param result optional bundle with result data
+         * @param result   optional bundle with result data
          */
         void onDiscardFromExtraAction(int actionId, @Nullable Bundle result);
     }
@@ -159,6 +161,7 @@ public class FullScreenDialogFragment extends DialogFragment {
 
     /**
      * Sets the callback that will be called when the dialog is closed due a extra action button click.
+     *
      * @param onDiscardFromExtraActionListener
      */
     public void setOnDiscardFromExtraActionListener(@Nullable OnDiscardFromExtraActionListener onDiscardFromExtraActionListener) {
@@ -282,6 +285,12 @@ public class FullScreenDialogFragment extends DialogFragment {
                             });
                 }
             }
+        } else {
+            toolbar.setPadding(
+                    toolbar.getPaddingLeft(),
+                    toolbar.getPaddingTop(),
+                    toolbar.getPaddingRight() + getResources().getDimensionPixelSize(R.dimen.toolbar_text_action_right_padding),
+                    toolbar.getPaddingBottom());
         }
     }
 
@@ -527,6 +536,7 @@ public class FullScreenDialogFragment extends DialogFragment {
 
         /**
          * Sets the callback that will be called when the dialog is closed due a extra action button click.
+         *
          * @param onDiscardFromActionListener
          * @return This Builder object to allow for chaining of calls to set methods
          */
